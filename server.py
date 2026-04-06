@@ -8,7 +8,7 @@ from youtube import util
 
 # these are just so the files get run - they import yt_app and add routes to it
 from youtube import (watch, search, playlist, channel, local_playlist, comments,
-                     subscriptions, reddit, facebook)
+                     subscriptions, reddit, facebook, gold)
 
 import settings
 
@@ -228,6 +228,7 @@ def site_dispatch(env, start_response):
         # Handle local Flask routes directly.
         if (path.startswith('/reddit')
                 or path.startswith('/facebook')
+                or path.startswith('/gold')
                 or path.startswith('/api/')):
             yield from yt_app(env, start_response)
             return

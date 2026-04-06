@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>{{ page_title }}</title>
+        <link href="/youtube.com/shared.css" type="text/css" rel="stylesheet">
+        <style>
+            body { max-width: 600px; margin: 2rem auto; font-family: sans-serif; text-align: center; }
+            .price-card { border: 2px solid #d4af37; border-radius: 8px; padding: 2rem; margin-top: 2rem; background: #fffde7; color: #333; }
+            .main-price { font-size: 3rem; font-weight: bold; color: #b8860b; margin: 1rem 0; }
+        </style>
+    </head>
+    <body>
+        <h1>{{ page_title }}</h1>
+        
+        <div class="price-card">
+            <h2>Current Extracted Prices</h2>
+            {% if prices %}
+                <div class="main-price">{{ prices[0] }}</div>
+                <p class="muted">Other values found: {{ prices[1:] | join(', ') }}</p>
+            {% else %}
+                <p>Could not extract the price. The site might be using JavaScript to load the live numbers, or the Tor exit node was blocked.</p>
+            {% endif %}
+        </div>
+    </body>
+</html>
