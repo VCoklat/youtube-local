@@ -9,7 +9,7 @@ from youtube import yt_app
 
 
 REDDIT_JSON_BASE = 'https://www.reddit.com'
-REDDIT_USER_AGENT = 'reddit-local/1.0 (+https://localhost)'
+REDDIT_USER_AGENT = 'reddit-local/1.0 (+https://github.com/VCoklat/youtube-local)'
 MEDIA_ALLOWLIST = {
     'i.redd.it',
     'preview.redd.it',

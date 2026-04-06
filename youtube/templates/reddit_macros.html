@@ -15,7 +15,7 @@
     </div>
 
     {% if post.selftext %}
-        <p>{{ post.selftext }}</p>
+        <p>{{ post.selftext|e }}</p>
     {% endif %}
 
     {% if post.external_url %}
@@ -50,7 +50,7 @@
                 {% if comment.author %}u/{{ comment.author }}{% endif %}
                 {% if comment.score is not none %} · score {{ comment.score }}{% endif %}
             </div>
-            <p>{{ comment.body }}</p>
+            <p>{{ comment.body|e }}</p>
             {% if comment.replies %}
                 {{ render_comments(comment.replies) }}
             {% endif %}
