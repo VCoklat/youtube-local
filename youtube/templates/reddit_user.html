@@ -1,0 +1,17 @@
+{% extends "reddit_base.html" %}
+{% from "reddit_macros.html" import render_post_list %}
+{% block main %}
+<h1>u/{{ username }}</h1>
+<form method="get" action="/reddit/user/{{ username }}">
+    <label><input type="radio" name="kind" value="all" {{ 'checked' if entry_kind == 'all' else '' }}> All</label>
+    <label><input type="radio" name="kind" value="submitted" {{ 'checked' if entry_kind == 'submitted' else '' }}> Posts</label>
+    <label><input type="radio" name="kind" value="comments" {{ 'checked' if entry_kind == 'comments' else '' }}> Comments</label>
+    <button class="button" type="submit">Apply</button>
+</form>
+{{ render_post_list(entries) }}
+{% if after %}
+<div class="pager">
+    <a class="button" href="/reddit/user/{{ username }}?kind={{ entry_kind }}&after={{ after|urlencode }}">Next page</a>
+</div>
+{% endif %}
+{% endblock %}

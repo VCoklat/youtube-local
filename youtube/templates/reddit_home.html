@@ -1,0 +1,11 @@
+{% extends "reddit_base.html" %}
+{% from "reddit_macros.html" import render_post_list %}
+{% block main %}
+<h1>Reddit Local - {{ 'r/all' if source == 'all' else 'r/popular' }}</h1>
+{{ render_post_list(listing.posts) }}
+{% if listing.after %}
+<div class="pager">
+    <a class="button" href="/reddit?source={{ source }}&after={{ listing.after|urlencode }}">Next page</a>
+</div>
+{% endif %}
+{% endblock %}

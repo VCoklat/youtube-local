@@ -46,6 +46,37 @@ The Youtube API is not used, so no keys or anything are needed. It uses the same
 * Video transcript
 * Supports all available video qualities: 144p through 2160p
 
+## Reddit-local (read-only)
+
+This project now includes a lightweight Reddit-local mode focused on privacy and performance.
+
+### Routes
+- Home feed: `http://localhost:8080/reddit` (`r/popular`)
+- Alternate home feed: `http://localhost:8080/reddit?source=all`
+- Subreddit: `http://localhost:8080/reddit/r/<subreddit>`
+- Post + comments: `http://localhost:8080/reddit/r/<subreddit>/comments/<post_id>/<slug>`
+- Search: `http://localhost:8080/reddit/search?q=<query>`
+- User history: `http://localhost:8080/reddit/user/<username>`
+
+### API routes (read-only)
+- `GET /api/home`
+- `GET /api/r/<subreddit>`
+- `GET /api/post/<post_id>?subreddit=<subreddit>`
+- `GET /api/post/r/<subreddit>/comments/<post_id>/<slug>`
+- `GET /api/search?q=<query>&kind=posts|subreddits`
+- `GET /api/user/<username>?kind=all|submitted|comments`
+
+### Privacy behavior
+- Reddit JSON endpoints are fetched with a custom User-Agent: `reddit-local/1.0 (+https://github.com/VCoklat/youtube-local)`.
+- Supported Reddit media hosts are proxied via backend route `/reddit/media`.
+- Direct third-party media links are not embedded in Reddit-local templates; rendered media uses proxied URLs.
+- Outbound URLs are sanitized to strip tracking parameters such as `utm_*`, `ref`, and related fields.
+
+### Scope and non-goals
+- Reddit-local is intentionally read-only.
+- No Reddit account login, voting, posting, or commenting flows are implemented.
+- No realtime notifications/chat and no algorithmic personalization features are added.
+
 ## Planned features
 - [ ] Putting videos from subscriptions or local playlists into the related videos
 - [x] Information about video (geographic regions, region of Tor exit node, etc)

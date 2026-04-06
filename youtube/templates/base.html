@@ -28,6 +28,7 @@
         <header>
                 <form id="site-search" action="/youtube.com/results">
                     <a href="/youtube.com" id="home-link">Home</a>
+                    <a href="/reddit" class="button">Reddit</a>
                     <input type="search" name="search_query" class="search-box" value="{{ search_box_value }}"
                         {{ "autofocus" if (request.path in ("/", "/results") or error_message) else "" }} placeholder="Type to search...">
                     <button type="submit" value="Search" class="button search-button">Search</button>

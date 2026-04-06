@@ -7,7 +7,8 @@ from youtube import yt_app
 from youtube import util
 
 # these are just so the files get run - they import yt_app and add routes to it
-from youtube import watch, search, playlist, channel, local_playlist, comments, subscriptions
+from youtube import (watch, search, playlist, channel, local_playlist, comments,
+                     subscriptions, reddit, facebook)
 
 import settings
 
@@ -222,6 +223,13 @@ def site_dispatch(env, start_response):
         # redirect localhost:8080 to localhost:8080/https://youtube.com
         if path == '' or path == '/':
             start_response('302 Found', [('Location', '/https://youtube.com')])
+            return
+
+        # Handle local Flask routes directly.
+        if (path.startswith('/reddit')
+                or path.startswith('/facebook')
+                or path.startswith('/api/')):
+            yield from yt_app(env, start_response)
             return
 
         try:
