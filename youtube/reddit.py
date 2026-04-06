@@ -115,7 +115,7 @@ def _proxy_media_url(url):
     if not _is_allowed_media_host(host):
         return None
 
-    return '/youtube.com/reddit/media?url=' + urllib.parse.quote(safe, safe='')
+    return '/reddit/media?url=' + urllib.parse.quote(safe, safe='')
 
 
 def _thumbnail_url(post_data):

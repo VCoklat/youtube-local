@@ -22,7 +22,7 @@ def test_proxy_media_url_requires_allowlist():
     allowed = 'https://i.redd.it/file.png?utm_source=a&x=1'
     proxied = reddit._proxy_media_url(allowed)
     assert proxied is not None
-    assert proxied.startswith('/youtube.com/reddit/media?url=')
+    assert proxied.startswith('/reddit/media?url=')
     target = urllib.parse.unquote(proxied.split('=', 1)[1])
     assert target == 'https://i.redd.it/file.png?x=1'
 
