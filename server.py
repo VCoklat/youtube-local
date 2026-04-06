@@ -225,7 +225,9 @@ def site_dispatch(env, start_response):
             return
 
         # Handle local Flask routes directly.
-        if path.startswith('/reddit') or path.startswith('/api/'):
+        if (path.startswith('/reddit')
+                or path.startswith('/facebook')
+                or path.startswith('/api/')):
             yield from yt_app(env, start_response)
             return
 
