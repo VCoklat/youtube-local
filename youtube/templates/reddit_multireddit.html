@@ -1,0 +1,13 @@
+{% extends "reddit_base.html" %}
+{% from "reddit_macros.html" import render_post_list %}
+{% block main %}
+<h1>u/{{ username }}/m/{{ multireddit }}</h1>
+
+{{ render_post_list(listing.posts) }}
+
+{% if listing.after %}
+<div class="pager">
+    <a class="button" href="/reddit/user/{{ username }}/m/{{ multireddit }}?after={{ listing.after|urlencode }}">Next page</a>
+</div>
+{% endif %}
+{% endblock %}

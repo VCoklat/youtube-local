@@ -107,15 +107,19 @@ def _sanitize_outbound_url(url):
 
 
 def _proxy_media_url(url):
-    safe = _sanitize_outbound_url(url)
-    if not safe:
+    if not url:
         return None
 
-    host = (urllib.parse.urlsplit(safe).hostname or '').lower()
+    # Do not sanitize! Sanitization breaks Reddit's image signature (s=)
+    parsed = urllib.parse.urlsplit(url)
+    if parsed.scheme not in ('http', 'https'):
+        return None
+
+    host = (parsed.hostname or '').lower()
     if not _is_allowed_media_host(host):
         return None
 
-    return '/reddit/media?url=' + urllib.parse.quote(safe, safe='')
+    return '/reddit/media?url=' + urllib.parse.quote(url, safe='')
 
 
 def _thumbnail_url(post_data):
@@ -406,6 +410,25 @@ def reddit_post_page(subreddit, post_id, slug=''):
         comments=data['comments'],
     )
 
+@yt_app.route('/reddit/user/<username>/m/<multireddit>')
+@yt_app.route('/reddit/user/<username>/m/<multireddit>.rss')
+def reddit_multireddit_page(username, multireddit):
+    after = request.args.get('after')
+    params = {'raw_json': 1}
+    if after:
+        params['after'] = after
+        
+    # Fetch standard post listing for the multireddit
+    path = f'/user/{username}/m/{multireddit}'
+    listing = _listing_or_empty(path, params)
+    
+    return flask.render_template(
+        'reddit_multireddit.html',
+        page_title=f'm/{multireddit} - Reddit Local',
+        username=username,
+        multireddit=multireddit,
+        listing=listing,
+    )
 
 @yt_app.route('/reddit/search')
 def reddit_search_page():
@@ -443,26 +466,24 @@ def reddit_media_proxy():
     if not target:
         return flask.abort(400)
 
-    safe_url = _sanitize_outbound_url(target)
-    if not safe_url:
-        return flask.abort(400)
-
-    parsed = urllib.parse.urlsplit(safe_url)
+    # Use the raw target. Do not use _sanitize_outbound_url!
+    parsed = urllib.parse.urlsplit(target)
     host = (parsed.hostname or '').lower()
     if parsed.scheme not in ('http', 'https'):
         return flask.abort(400)
     if not _is_allowed_media_host(host):
         return flask.abort(403)
 
+    # Use a standard browser User-Agent to bypass Reddit CDN bot protection
     headers = {
-        'User-Agent': REDDIT_USER_AGENT,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': '*/*',
     }
     if 'Range' in request.headers:
         headers['Range'] = request.headers['Range']
 
     response, cleanup_func = util.fetch_url_response(
-        safe_url,
+        target,  # Pass the raw target, not safe_url
         headers=headers,
         use_tor=False,
         max_redirects=3,
