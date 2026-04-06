@@ -17,6 +17,7 @@ MEDIA_ALLOWLIST = {
     'v.redd.it',
     'www.redditstatic.com',
     'emoji.redditmedia.com',
+    'redgifs.com', 
 }
 TRACKING_QUERY_PREFIXES = ('utm_',)
 TRACKING_QUERY_KEYS = {
@@ -146,6 +147,13 @@ def _video_url(post_data):
     reddit_video = media.get('reddit_video') or {}
     if reddit_video.get('fallback_url'):
         return reddit_video['fallback_url']
+
+    # Catch RedGifs and other external animated GIFs 
+    preview = post_data.get('preview') or {}
+    reddit_video_preview = preview.get('reddit_video_preview') or {}
+    if reddit_video_preview.get('fallback_url'):
+        return reddit_video_preview['fallback_url']
+
     return None
 
 
