@@ -224,6 +224,11 @@ def site_dispatch(env, start_response):
             start_response('302 Found', [('Location', '/https://youtube.com')])
             return
 
+        # Handle local Flask routes directly.
+        if path.startswith('/reddit') or path.startswith('/api/'):
+            yield from yt_app(env, start_response)
+            return
+
         try:
             env['SERVER_NAME'], env['PATH_INFO'] = split_url(path[1:])
         except ValueError:
