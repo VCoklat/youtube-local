@@ -67,7 +67,7 @@ This project now includes a lightweight Reddit-local mode focused on privacy and
 - `GET /youtube.com/api/user/<username>?kind=all|submitted|comments`
 
 ### Privacy behavior
-- Reddit JSON endpoints are fetched with a custom User-Agent: `reddit-local/1.0 (+https://localhost)`.
+- Reddit JSON endpoints are fetched with a custom User-Agent: `reddit-local/1.0 (+https://github.com/VCoklat/youtube-local)`.
 - Supported Reddit media hosts are proxied via backend route `/youtube.com/reddit/media`.
 - Direct third-party media links are not embedded in Reddit-local templates; rendered media uses proxied URLs.
 - Outbound URLs are sanitized to strip tracking parameters such as `utm_*`, `ref`, and related fields.
