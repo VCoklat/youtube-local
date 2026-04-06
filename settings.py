@@ -46,19 +46,19 @@ SETTINGS_INFO = collections.OrderedDict([
 
     ('allow_foreign_addresses', {
         'type': bool,
-        'default': False,
+        'default': True,
         'comment': '''This will allow others to connect to your Youtube Local instance as a website.
 For security reasons, enabling this is not recommended.''',
-        'hidden': True,
+        'hidden': False,
         'category': 'network',
     }),
 
     ('allow_foreign_post_requests', {
         'type': bool,
-        'default': False,
+        'default': True,
         'comment': '''Enables requests from foreign addresses to make post requests.
 For security reasons, enabling this is not recommended.''',
-        'hidden': True,
+        'hidden': False,
         'category': 'network',
     }),
 
