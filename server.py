@@ -21,6 +21,7 @@ import subprocess
 import re
 import sys
 import time
+import io
 
 
 
@@ -68,6 +69,15 @@ def proxy_site(env, start_response, video=False):
     if env['QUERY_STRING']:
         url += '?' + env['QUERY_STRING']
 
+    # Image compression applies to non-video image requests when enabled,
+    # Pillow is available, and no Range header is present (full image only).
+    do_compress_image = (
+        not video
+        and util.have_pillow
+        and settings.compress_images
+        and 'HTTP_RANGE' not in env
+    )
+
     try_num = 1
     first_attempt = True
     current_attempt_position = 0
@@ -96,14 +106,49 @@ def proxy_site(env, start_response, video=False):
             response_headers = (list(response_headers)
                                 +[('Access-Control-Allow-Origin', '*')])
 
-        if first_attempt:
-            start_response(str(response.status) + ' ' + response.reason,
-                           response_headers)
+        # Determine if this response is a compressible image type
+        headers_dict = {k.lower(): v for k, v in response_headers}
+        content_type = headers_dict.get('content-type', '')
+        is_compressible_image = (
+            do_compress_image
+            and response.status == 200
+            and content_type.startswith(('image/jpeg', 'image/png'))
+        )
 
-        content_length = int(dict(response_headers).get('Content-Length', 0))
+        content_length = int(headers_dict.get('content-length', 0))
         if response.status >= 400:
             print('Error: Youtube returned "%d %s" while routing %s' % (
                 response.status, response.reason, url.split('?')[0]))
+
+        if is_compressible_image:
+            # Buffer the full image, compress it, then send with updated headers
+            chunks = []
+            chunk = response.read(32*8192)
+            while chunk:
+                chunks.append(chunk)
+                chunk = response.read(32*8192)
+            raw_data = b''.join(chunks)
+            cleanup_func(response)
+
+            compressed_data, new_content_type = util.compress_image(
+                raw_data, content_type, settings.image_quality
+            )
+            new_headers = [
+                (k, v) for k, v in response_headers
+                if k.lower() not in ('content-length', 'content-type',
+                                     'content-encoding')
+            ]
+            new_headers.append(('Content-Length', str(len(compressed_data))))
+            new_headers.append(('Content-Type', new_content_type))
+            start_response(
+                str(response.status) + ' ' + response.reason, new_headers
+            )
+            yield compressed_data
+            return
+
+        if first_attempt:
+            start_response(str(response.status) + ' ' + response.reason,
+                           response_headers)
 
         total_received = 0
         retry = False
