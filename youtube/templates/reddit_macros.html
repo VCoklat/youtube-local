@@ -1,0 +1,60 @@
+{% macro render_post_card(post) %}
+<article class="reddit-card">
+    <h2>
+        {% if post.post_url %}
+            <a href="/reddit{{ post.permalink }}">{{ post.title }}</a>
+        {% else %}
+            {{ post.title }}
+        {% endif %}
+    </h2>
+    <div class="reddit-meta muted">
+        {% if post.subreddit %}r/{{ post.subreddit }} · {% endif %}
+        {% if post.author %}u/{{ post.author }} · {% endif %}
+        {% if post.score is not none %}score {{ post.score }} · {% endif %}
+        {% if post.num_comments is not none %}{{ post.num_comments }} comments{% endif %}
+    </div>
+
+    {% if post.selftext %}
+        <p>{{ post.selftext }}</p>
+    {% endif %}
+
+    {% if post.external_url %}
+        <p><a href="{{ post.external_url }}" rel="noopener noreferrer" target="_blank">Open linked article</a></p>
+    {% endif %}
+
+    {% if post.thumbnail %}
+        <img class="reddit-thumb" loading="lazy" src="{{ post.thumbnail }}" alt="Post thumbnail">
+    {% endif %}
+
+    {% if post.media_url %}
+        <video class="reddit-media" controls preload="metadata" src="{{ post.media_url }}"></video>
+    {% endif %}
+</article>
+{% endmacro %}
+
+{% macro render_post_list(posts) %}
+    {% if posts %}
+        {% for post in posts %}
+            {{ render_post_card(post) }}
+        {% endfor %}
+    {% else %}
+        <p class="muted">No results.</p>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_comments(comments) %}
+<ul class="reddit-comments">
+    {% for comment in comments %}
+        <li class="reddit-comment">
+            <div class="reddit-meta muted">
+                {% if comment.author %}u/{{ comment.author }}{% endif %}
+                {% if comment.score is not none %} · score {{ comment.score }}{% endif %}
+            </div>
+            <p>{{ comment.body }}</p>
+            {% if comment.replies %}
+                {{ render_comments(comment.replies) }}
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endmacro %}

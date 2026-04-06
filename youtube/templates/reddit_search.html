@@ -1,0 +1,17 @@
+{% extends "reddit_base.html" %}
+{% from "reddit_macros.html" import render_post_list %}
+{% block main %}
+<h1>Search</h1>
+<form method="get" action="/reddit/search">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search query">
+    <label><input type="radio" name="kind" value="posts" {{ 'checked' if kind == 'posts' else '' }}> Posts</label>
+    <label><input type="radio" name="kind" value="subreddits" {{ 'checked' if kind == 'subreddits' else '' }}> Subreddits</label>
+    <button class="button" type="submit">Search</button>
+</form>
+{{ render_post_list(listing.posts) }}
+{% if listing.after and query %}
+<div class="pager">
+    <a class="button" href="/reddit/search?q={{ query|urlencode }}&kind={{ kind }}&after={{ listing.after|urlencode }}">Next page</a>
+</div>
+{% endif %}
+{% endblock %}

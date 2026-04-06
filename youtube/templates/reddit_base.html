@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>{{ page_title }}</title>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; img-src 'self'; media-src 'self'">
+        <link href="/youtube.com/shared.css" type="text/css" rel="stylesheet">
+        <link href="{{ theme_path }}" type="text/css" rel="stylesheet">
+        <style>
+            .reddit-nav { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+            .reddit-card { border: 1px solid #888; border-radius: 6px; padding: 0.75rem; margin-bottom: 0.75rem; }
+            .reddit-meta { font-size: 0.9em; opacity: 0.85; margin-bottom: 0.5rem; }
+            .reddit-thumb { max-width: 240px; max-height: 180px; margin-top: 0.5rem; }
+            .reddit-media { width: 100%; max-width: 680px; margin-top: 0.5rem; }
+            .reddit-comments { list-style: none; padding-left: 1rem; }
+            .reddit-comment { border-left: 2px solid #777; margin: 0.5rem 0; padding-left: 0.75rem; }
+            .pager { margin-top: 1rem; }
+            .muted { opacity: 0.8; }
+            textarea { width: 100%; min-height: 3rem; }
+        </style>
+    </head>
+    <body>
+        <header>
+            <form action="/reddit/search" method="get" id="site-search">
+                <a href="/reddit" id="home-link">Reddit Local</a>
+                <input type="search" name="q" class="search-box" value="{{ query if query is defined else '' }}" placeholder="Search posts/subreddits">
+                <button type="submit" class="button">Search</button>
+                <a href="/reddit" class="button">Popular</a>
+                <a href="/reddit?source=all" class="button">r/all</a>
+            </form>
+        </header>
+        <main>
+            {% block main %}{% endblock %}
+        </main>
+    </body>
+</html>

@@ -1,0 +1,11 @@
+{% extends "reddit_base.html" %}
+{% from "reddit_macros.html" import render_post_card, render_comments %}
+{% block main %}
+{% if post %}
+    {{ render_post_card(post) }}
+    <h3>Comments</h3>
+    {{ render_comments(comments) }}
+{% else %}
+    <p>Post unavailable.</p>
+{% endif %}
+{% endblock %}
