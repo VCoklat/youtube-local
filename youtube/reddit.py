@@ -499,13 +499,13 @@ def reddit_media_proxy():
     )
 
     original_content_type = response.headers.get('Content-Type', '')
-    content_type = original_content_type.split(';', 1)[0].strip().lower()
+    base_content_type = original_content_type.split(';', 1)[0].strip().lower()
     should_compress_image = (
         settings.compress_images
         and util.have_pillow
         and 'Range' not in request.headers
         and response.status == 200
-        and content_type in ('image/jpeg', 'image/png')
+        and base_content_type in ('image/jpeg', 'image/png')
         and not response.headers.get('Content-Encoding')
     )
 
@@ -537,12 +537,12 @@ def reddit_media_proxy():
 
         raw_data = b''.join(chunks)
         compressed_data, compressed_content_type = util.compress_image(
-            raw_data, content_type, settings.image_quality
+            raw_data, base_content_type, settings.image_quality
         )
 
         if len(compressed_data) >= len(raw_data):
             final_data = raw_data
-            final_content_type = original_content_type or content_type
+            final_content_type = original_content_type
         else:
             final_data = compressed_data
             final_content_type = compressed_content_type
