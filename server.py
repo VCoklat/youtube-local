@@ -8,7 +8,7 @@ from youtube import util
 
 # these are just so the files get run - they import yt_app and add routes to it
 from youtube import (watch, search, playlist, channel, local_playlist, comments,
-                     subscriptions, reddit, facebook, gold)
+                     subscriptions, reddit)
 
 import settings
 
