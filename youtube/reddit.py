@@ -6,6 +6,7 @@ from flask import request
 
 from youtube import util
 from youtube import yt_app
+import settings
 
 
 REDDIT_JSON_BASE = 'https://www.reddit.com'
@@ -497,6 +498,17 @@ def reddit_media_proxy():
         max_redirects=3,
     )
 
+    original_content_type = response.headers.get('Content-Type', '')
+    content_type = original_content_type.split(';', 1)[0].strip().lower()
+    should_compress_image = (
+        settings.compress_images
+        and util.have_pillow
+        and 'Range' not in request.headers
+        and response.status == 200
+        and content_type in ('image/jpeg', 'image/png')
+        and not response.headers.get('Content-Encoding')
+    )
+
     headers_out = []
     for key in (
         'Content-Type',
@@ -506,10 +518,45 @@ def reddit_media_proxy():
         'Cache-Control',
         'ETag',
         'Last-Modified',
+        'Content-Encoding',
     ):
         value = response.headers.get(key)
         if value:
             headers_out.append((key, value))
+
+    if should_compress_image:
+        try:
+            chunks = []
+            while True:
+                chunk = response.read(64 * 1024)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+        finally:
+            cleanup_func(response)
+
+        raw_data = b''.join(chunks)
+        compressed_data, compressed_content_type = util.compress_image(
+            raw_data, content_type, settings.image_quality
+        )
+
+        if len(compressed_data) >= len(raw_data):
+            final_data = raw_data
+            final_content_type = original_content_type or content_type
+        else:
+            final_data = compressed_data
+            final_content_type = compressed_content_type
+
+        headers_out = [
+            (key, value) for key, value in headers_out
+            if key.lower() not in (
+                'content-length', 'content-type', 'content-encoding'
+            )
+        ]
+        headers_out.append(('Content-Length', str(len(final_data))))
+        headers_out.append(('Content-Type', final_content_type))
+
+        return flask.Response(final_data, status=response.status, headers=headers_out)
 
     def generate():
         try:
