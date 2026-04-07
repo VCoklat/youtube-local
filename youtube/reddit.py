@@ -1,5 +1,6 @@
 import json
 import urllib.parse
+import urllib.request
 
 import flask
 from flask import request
@@ -36,6 +37,49 @@ def _json_headers():
         ('Accept', 'application/json'),
     )
 
+def _get_redgifs_mp4(url):
+    """Fetches the actual video URL with audio from the RedGifs API."""
+    import urllib.parse
+    import urllib.request
+    import json
+    
+    try:
+        # Extract the RedGifs ID from the URL (e.g., https://redgifs.com/watch/ID)
+        parsed = urllib.parse.urlsplit(url)
+        path_parts = parsed.path.strip('/').split('/')
+        video_id = path_parts[-1].lower() if path_parts else None
+        
+        if not video_id:
+            return None
+
+        # 1. Get a temporary auth token
+        auth_req = urllib.request.Request(
+            'https://api.redgifs.com/v2/auth/temporary',
+            headers={'User-Agent': 'Mozilla/5.0'}
+        )
+        with urllib.request.urlopen(auth_req, timeout=5) as auth_res:
+            auth_data = json.loads(auth_res.read().decode('utf-8'))
+            token = auth_data.get('token')
+
+        if not token:
+            return None
+
+        # 2. Fetch video metadata
+        req = urllib.request.Request(
+            f'https://api.redgifs.com/v2/gifs/{video_id}',
+            headers={
+                'User-Agent': 'Mozilla/5.0',
+                'Authorization': f'Bearer {token}'
+            }
+        )
+        with urllib.request.urlopen(req, timeout=5) as res:
+            data = json.loads(res.read().decode('utf-8'))
+            urls = data.get('gif', {}).get('urls', {})
+            return urls.get('sd') or urls.get('hd')
+            
+    except Exception:
+        # Fallback to None if the API fails or layout changes
+        return None
 
 def _full_json_url(path, params=None):
     if not path.startswith('/'):
@@ -138,6 +182,15 @@ def _thumbnail_url(post_data):
 
 
 def _video_url(post_data):
+    # --- ADD THIS BLOCK ---
+    # Check if the post is a RedGifs link
+    domain = post_data.get('domain')
+    url = post_data.get('url_overridden_by_dest') or post_data.get('url')
+    if domain == 'redgifs.com' or (url and 'redgifs.com' in url):
+        redgifs_url = _get_redgifs_mp4(url)
+        if redgifs_url:
+            return redgifs_url
+    # ----------------------
     secure_media = post_data.get('secure_media') or {}
     reddit_video = secure_media.get('reddit_video') or {}
     if reddit_video.get('fallback_url'):
