@@ -1,4 +1,4 @@
-# youtube-local
+# local-yt,reddit,etc proxy
 
 > **Author's Note / Fork Information**
 > 
@@ -65,9 +65,9 @@ The Youtube API is not used, so no keys or anything are needed. It uses the same
 ## Reddit-local (read-only)
 
 This project now includes a lightweight Reddit-local mode focused on privacy and performance.
-![screenshot home]("image/home.png")
-![screenshot reddit home]("image/reddithome.png")
-![screenshot subreddit]("image/subreddit.png")
+![screenshot home](image/home.png)
+![screenshot reddit home](image/reddithome.png)
+![screenshot subreddit](image/subreddit.png)
 
 ### Routes
 - Home feed: `http://localhost:8080/reddit` (`r/popular`)
