@@ -1,11 +1,17 @@
 import settings
 import socks, sockshandler
 import gzip
+import io
 try:
     import brotli
     have_brotli = True
 except ImportError:
     have_brotli = False
+try:
+    from PIL import Image as PILImage
+    have_pillow = True
+except ImportError:
+    have_pillow = False
 import urllib.parse
 import re
 import time
@@ -55,6 +61,32 @@ import urllib3.contrib.socks
 URL_ORIGIN = "/https://www.youtube.com"
 
 connection_pool = urllib3.PoolManager(cert_reqs = 'CERT_REQUIRED')
+
+
+def compress_image(data, content_type, quality):
+    '''Compress image data using Pillow.
+
+    Returns (compressed_bytes, new_content_type).  If Pillow is not installed
+    or compression fails, returns the original (data, content_type) unchanged.
+    '''
+    if not have_pillow:
+        return data, content_type
+    try:
+        img = PILImage.open(io.BytesIO(data))
+        if img.mode in ('RGBA', 'P', 'LA'):
+            # Preserve transparency by keeping PNG format
+            out = io.BytesIO()
+            img.save(out, format='PNG', optimize=True)
+            return out.getvalue(), 'image/png'
+        else:
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            out = io.BytesIO()
+            img.save(out, format='JPEG', quality=quality, optimize=True)
+            return out.getvalue(), 'image/jpeg'
+    except Exception as e:
+        print('Warning: image compression failed:', e)
+        return data, content_type
 
 class TorManager:
     MAX_TRIES = 3

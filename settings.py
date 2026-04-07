@@ -243,6 +243,35 @@ Defaults to -1, which means no default value is forced and the browser will set 
         'category': 'network',
     }),
 
+    ('compress_images', {
+        'label': 'Compress images',
+        'type': bool,
+        'default': False,
+        'comment': '''Compress proxied images to reduce bandwidth usage.
+Requires Pillow (pip install Pillow). Has no effect if Pillow is not installed.''',
+        'category': 'network',
+    }),
+
+    ('image_quality', {
+        'label': 'Image compression quality',
+        'type': int,
+        'default': 70,
+        'min': 1,
+        'max': 100,
+        'comment': '''JPEG quality (1-100) used when compress_images is enabled.
+Lower values reduce file size but also reduce image quality.''',
+        'category': 'network',
+    }),
+
+    ('enable_response_compression', {
+        'label': 'Compress text responses',
+        'type': bool,
+        'default': False,
+        'comment': '''Gzip-compress HTML, CSS, and JavaScript responses to reduce
+bandwidth usage for the web interface.''',
+        'category': 'network',
+    }),
+
     ('use_comments_js', {
         'label': 'Enable comments.js',
         'type': bool,

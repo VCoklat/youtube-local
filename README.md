@@ -72,6 +72,17 @@ This project now includes a lightweight Reddit-local mode focused on privacy and
 - Direct third-party media links are not embedded in Reddit-local templates; rendered media uses proxied URLs.
 - Outbound URLs are sanitized to strip tracking parameters such as `utm_*`, `ref`, and related fields.
 
+### Compression features
+- `compress_images` (network setting, default `False`)
+  - Recompresses proxied JPEG/PNG images to reduce bandwidth.
+  - Applies to standard proxied image hosts and Reddit media proxy route (`/reddit/media`).
+  - Only applies to full-image responses (not `Range` requests), and requires Pillow.
+- `image_quality` (network setting, default `70`)
+  - JPEG quality used when `compress_images` is enabled (`1-100`).
+- `enable_response_compression` (network setting, default `False`)
+  - Gzip-compresses eligible text responses (HTML/CSS/JS/JSON/XML/plain text) when the browser sends `Accept-Encoding: gzip`.
+  - This includes Reddit-local pages and Reddit API responses served by this app.
+
 ### Scope and non-goals
 - Reddit-local is intentionally read-only.
 - No Reddit account login, voting, posting, or commenting flows are implemented.

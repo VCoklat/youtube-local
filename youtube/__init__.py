@@ -5,6 +5,7 @@ import jinja2
 import settings
 import traceback
 import re
+import gzip
 from sys import exc_info
 yt_app = flask.Flask(__name__)
 yt_app.url_map.strict_slashes = False
@@ -60,6 +61,45 @@ TIMESTAMP_RE = re.compile(r'\b(\d?\d:)?\d?\d:\d\d\b')
 @yt_app.template_filter('timestamps')
 def timestamps(text):
     return TIMESTAMP_RE.sub(timestamp_replacement, text)
+
+_COMPRESSIBLE_MIMETYPES = (
+    'text/html',
+    'text/css',
+    'text/javascript',
+    'application/javascript',
+    'application/json',
+    'text/plain',
+    'text/xml',
+    'application/xml',
+)
+
+@yt_app.after_request
+def compress_response(response):
+    '''Gzip-compress text responses when the client supports it and the
+    enable_response_compression setting is active.'''
+    if not settings.enable_response_compression:
+        return response
+    accept_encoding = request.headers.get('Accept-Encoding', '')
+    if 'gzip' not in accept_encoding:
+        return response
+    content_type = (response.content_type or '').split(';')[0].strip()
+    if content_type not in _COMPRESSIBLE_MIMETYPES:
+        return response
+    # Do not compress already-encoded or streaming responses
+    if response.headers.get('Content-Encoding'):
+        return response
+    if response.direct_passthrough:
+        return response
+    data = response.get_data()
+    compressed = gzip.compress(data, compresslevel=6)
+    # Only use compressed version if it is actually smaller
+    if len(compressed) >= len(data):
+        return response
+    response.set_data(compressed)
+    response.headers['Content-Encoding'] = 'gzip'
+    response.headers['Content-Length'] = len(compressed)
+    response.headers['Vary'] = 'Accept-Encoding'
+    return response
 
 @yt_app.errorhandler(500)
 def error_page(e):
